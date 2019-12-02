@@ -1,0 +1,437 @@
+.data
+	welcome: .asciiz "\nBienvenido\n"
+	salto: .asciiz "\n"
+	msg1 : .asciiz "\nIngrese un numero: "
+	msg2 : .asciiz "\nIngresaste: "
+	intento: .asciiz "\nIngrese el elemento numero: "
+	tab: .asciiz "\t"
+	numText: .space 256
+
+###############################################################################
+###############################################################################
+################################# M A I N #####################################
+###############################################################################
+###############################################################################
+
+.text 
+   
+#defino espcaio para la matriz $t1, contiene el inicio
+	addi $t1, $zero, 268501120
+	addi $t2, $t1 , 0
+
+#Mensaje de bienvenida
+	la $a0, welcome
+	li $v0, 4
+	syscall
+
+#SALTO DE LINEA
+	la $a0, salto
+	li $v0, 4
+	syscall
+#INICIO CONTADOR DE INDICE CARGAR MATRIZ
+	addi $s0, $zero, 1
+
+#PIDE UNA CADENA
+volver:
+#SALTO DE LINEA
+	la $a0, salto
+	li $v0, 4
+	syscall
+
+#IMPRESIONES
+	la $a0, intento
+	li $v0, 4
+	syscall
+
+#IMPRIMO VALOR DEL CONTADOR	
+	add $a0, $zero, $s0
+	li $v0, 1
+	syscall
+	
+	la $a0, salto
+	li $v0, 4
+	syscall
+
+	la $a0, msg1
+	li $v0, 4
+	syscall
+
+#PIDO CADENA
+	la $a0, numText
+	li $a1, 2
+	li $v0, 8
+	syscall
+
+	la $a0, salto
+	li $v0, 4
+	syscall
+	la $a0, salto
+	li $v0, 4
+	syscall
+
+#BUSCO DE LA MEMORIA LA CADENA EN BYTE Y SE TRANSFORMA EN ENTERO EN LOS REGISTROS
+	la $a1, numText
+	lb $t0, 0($a1)		#$T0 CONTIENE EL CODIGO ASCII
+	sub $t0, $t0, 48 	#$T0 AHORA ES UN ENTERO
+
+#IMRPIME ? "Ingresaste el numero: "
+	la $a0, msg2
+	li $v0, 4
+	syscall
+
+	li $v0, 1
+	addi $a0, $t0, 0
+	syscall
+
+#COMPRUEBO QUE ESUN NUEMRO ENTRE 0 Y 9 SINO, VUELVE A PEDIR EL NUMERO 
+	ble $t0, 9, cond1
+	j volver
+cond1:
+	bge $t0, 0, run
+	j volver
+#CARGO EL NUMERO CORRECTO EN LA MATRIZ hasta el elemento 81
+run:
+	sw $t0, 0($t2)
+	addi $t2, $t2, 4
+	addi $s0, $s0, 1
+
+	bne $s0, 82, volver
+
+j imprimir
+
+
+###############################################################################
+###############################################################################
+################################# F I N  M A I N ##############################
+###############################################################################
+###############################################################################
+
+
+
+
+
+
+
+j funcionSolucion
+
+
+###############################################################################
+###############################################################################
+####################### F U N C I O N - S O L U C I O N #######################
+###############################################################################
+###############################################################################
+
+funcionSolucion:
+## $S0 LA FILA
+## $S1 LA COLUMNA
+## $s6 para el num en funcion
+## $t6 para el return 
+	addi $s0, $0,0
+	addi $s1, $0,0
+
+	j funcionEncontrarCero
+	
+	continuaFuncionSolucion:
+	beq $t9, 1, RetornoVerdadero
+	
+	addi $s6, $0, 1
+	
+	
+	
+	#desde num=1 hasta 9
+	loopNumero:
+		addi $t8, $0, 0
+		j isSave
+		continuaFuncionSolucion2:
+
+		#if(isSolve == TRUE)
+		bne $t8, 1, finSi
+			
+			mul $t4,$s0,9
+			add $t4,$t4,$s1
+			mul $t4,$t4,4
+			add $t4,$t4,$t1
+	
+			sw $s6, 0($t4)
+
+			j funcionSolucion
+			RetornoVerdadero:
+				addi $t6,$0,1
+			#if(val == 1) termina 1
+			RetornoFalso:
+			addi $s6,$0,0
+
+		finSi:
+		addi $s6, $s6,1
+	bne $s6, 10, loopNumero #fin desde
+	
+	addi $t6, $0,0
+	j RetornoFalso
+
+
+
+
+
+
+
+
+
+
+######################################################################################
+funcionEncontrarCero:
+## $k0, auxiliar fila
+## $k1 auxiliar columna
+
+ 
+	addi $k0, $0,0
+	addi $k1, $0,0
+	
+loopFilaFindO:
+
+	addi $k1, $0,0
+	loopColumFind0:
+		mul $t7,$k0,9
+		add $t7,$t7,$k1
+		mul $t7,$t7,4
+		add $t7,$t7,$t1
+	
+		lw $t0, 0($t7)
+
+		beq $t0,0, AsignamosVERDADERO
+		
+		addi $k1, $k1, 1
+		
+	bne $k1, 9, loopColumFind0
+
+	addi $k0, $k0,1
+	
+bne $k0,9,loopFilaFindO
+
+j imprimir
+	
+AsignamosVERDADERO:
+
+	add $s0, $k0, $0
+	add $s1, $k1, $0
+
+	add $t9,$0,1
+	
+	j continuaFuncionSolucion
+	
+
+## VERIFICAR USO DE VARIABLEES FILA Y COLUMNA
+########################################################################################
+isSave:
+	add $s7,$s6,$0 
+	addi $s1,$0,0
+## $s0 esta la fila
+## $s1 esta la columna
+## $t1 esta la direccion base
+## $t8 tenemos el return de isSave
+## $t7 tenemos el return de UsedInRow,UsedInCol,UsedInBox
+## $s6 tenemos el posible valor a introducir
+## $t4 auxiliar de direccion del elemento de matriz
+
+	addi $t4, $0, 0
+
+	addi $t7, $0,0
+	
+	j UsedInRow
+	regresa1:
+	addi $t8,$t8,$t7
+	
+	addi $t7, $0,0
+	j UsedInCol
+	regresa2:
+	addi $t8,$t8,$t7
+	
+	addi $a3,$0,3
+	
+	divu $s0,$a3
+	
+	mflo $a2
+	
+	divu $s1,$a3
+	
+	mflo $a3
+	
+	
+	
+	addi $t7, $0,0
+	j UsedInBox
+	regresa3:
+	add $t8,$t8,$t7
+	
+	mul $t4,$s0,9
+	add $t4,$t4,$s1
+	mul $t4,$t4,4
+	add $t4,$t4,$t1
+	
+	lw $t0, 0($t4)
+	
+	bne $t0,0,FALSORETUNR
+	addi $t8, $t8,1
+
+	bne $t8,4,FALSORETUNR
+	
+		#VERDADERO
+		addi $t8,$0,1	
+		j continuaFuncionSolucion2
+	FALSORETUNR:
+	
+	addi $t8,$0,0
+	j continuaFuncionSolucion2
+	
+############################################################################################
+UsedInRow:
+## $s0 esta la fila
+## $s6 tenemos el posible valor a introducir
+## $t4 auxiliar de movimiento
+	
+	add $t3, $0,$0
+	
+	loopFilaUsedInRow:
+		
+		mul $t4,$s0,9
+		add $t4,$t4,$t3
+		mul $t4,$t4,4
+		add $t4,$t4,$t1
+		
+		lw $t0, 0($t4)
+		
+		beq $t0,$s6,RETUNFALSOUsedInRow
+
+		add1 $t3, $t3,1
+		
+		bne $t3,9,loopFilaUsedInRow
+
+		j RETURNVERDADEROUsedInRow
+
+RETURNVERDADEROUsedInRow:
+	addi $t7,$0,1
+	j regresa1
+RETUNFALSOUsedInRow:
+	addi $t7,$0,0	
+	j regresa1	
+############################################################################################
+UsedInCol:
+## $s1 esta la columna
+## $s6 tenemos el posible valor a introducir
+## $t3 auxiliar de movimiento
+	add $t3, $0,$0
+	
+	loopColumnaUsedInCol:
+		
+		mul $t4,$t3,9
+		add $t4,$t4,$s1
+		mul $t4,$t4,4
+		add $t4,$t4,$t1
+		
+		lw $t0, 0($t4)
+		
+		beq $t0,$s6,RETUNRFALSOUsedInCol
+
+		add1 $t3, $t3,1
+		
+		bne $t3,9,loopColumnaUsedInCol
+
+		j RETUNRVERDADEROUsedInCol
+
+RETUNRVERDADEROUsedInCol
+	addi $t7,$0,1
+	j regresa2
+RETUNRFALSOUsedInCol
+	addi $t7,$0,1
+	j regresa2
+
+############################################################################################
+UsedInBox:
+
+## $s6 el numero a colocar
+## $t3 el indice de fila uxiliar
+## $t5 el indice de columna auxiliar
+## $a2 el boxStarRow
+## $a3 el boxStarCol
+## $s4 suma fila y starRow
+## $s5 suma col y starCol
+## $t4 auxiliar direccion de movimiento
+## $t7 es su return
+
+	addi $t3, $0, 0
+	addi $t5, $0, 0
+	addi $s4, $0, 0
+	addi $s5, $0, 0
+
+	loopFILAUsedInBox:
+
+		addi $t5, $0, 0
+		loopCOLUMNAUsedInBox:
+		
+			add $s4, $t3, $a2
+			add $s5, $t5, $a3
+		
+			mul $t4,$s4,9
+			add $t4,$t4,$s5
+			mul $t4,$t4,4
+			add $t4,$t4,$t1
+		
+			lw $t0, 0($t4)
+
+			beq $t0,$s6,RETUNRFALSOUsedInBox
+
+			addi $t5, $t5, 1
+			
+		bne $t5,3,loopCOLUMNAUsedInBox
+	
+		addi $t3, $t3, 1
+		
+	bne $t3,3,loopFILAUsedInBox	
+		
+	j RETURNVERDADEROUsedInBox
+
+RETURNVERDADEROUsedInBox
+	addi $t7,$0,1
+	j regresa3
+
+RETUNRFALSOUsedInBox
+	addi $t7,$0,0
+	j regresa3
+
+###############################################################################
+###############################################################################
+########################## I M P R I M I R  M A T R I Z #######################
+###############################################################################
+###############################################################################
+imprimir:
+
+addi $t2,$t1,0
+addi $t4,$zero,0
+#HACEMOS FOR
+loop1:
+	la $a0, salto
+	li $v0, 4
+	syscall
+	addi $t3, $zero, 0
+	beq $t4, 81, funcionSolucion
+	
+loop2:
+	addi $t4, $t4, 1
+	addi $t3, $t3, 1
+	
+	lw $t0, 0($t2)
+	
+	li $v0, 1
+	addi $a0, $t0, 0
+	syscall
+
+	addi $t2, $t2, 4
+
+	la $a0, tab
+	li $v0, 4
+	syscall
+
+	
+	beq $t3, 9, loop1
+	bne $t4, 81, loop2
+
+
