@@ -238,12 +238,12 @@ isSave:
 	
 	j UsedInRow
 	regresa1:
-	addi $t8,$t8,$t7
+	add $t8,$t8,$t7
 	
 	addi $t7, $0,0
 	j UsedInCol
 	regresa2:
-	addi $t8,$t8,$t7
+	add $t8,$t8,$t7
 	
 	addi $a3,$0,3
 	
@@ -301,7 +301,7 @@ UsedInRow:
 		
 		beq $t0,$s6,RETUNFALSOUsedInRow
 
-		add1 $t3, $t3,1
+		addi $t3, $t3,1
 		
 		bne $t3,9,loopFilaUsedInRow
 
@@ -331,16 +331,16 @@ UsedInCol:
 		
 		beq $t0,$s6,RETUNRFALSOUsedInCol
 
-		add1 $t3, $t3,1
+		addi $t3, $t3,1
 		
 		bne $t3,9,loopColumnaUsedInCol
 
 		j RETUNRVERDADEROUsedInCol
 
-RETUNRVERDADEROUsedInCol
+RETUNRVERDADEROUsedInCol:
 	addi $t7,$0,1
 	j regresa2
-RETUNRFALSOUsedInCol
+RETUNRFALSOUsedInCol:
 	addi $t7,$0,1
 	j regresa2
 
@@ -389,11 +389,11 @@ UsedInBox:
 		
 	j RETURNVERDADEROUsedInBox
 
-RETURNVERDADEROUsedInBox
+RETURNVERDADEROUsedInBox:
 	addi $t7,$0,1
 	j regresa3
 
-RETUNRFALSOUsedInBox
+RETUNRFALSOUsedInBox:
 	addi $t7,$0,0
 	j regresa3
 
